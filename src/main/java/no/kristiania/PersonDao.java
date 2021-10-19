@@ -1,9 +1,12 @@
 package no.kristiania;
 
+import org.postgresql.ds.PGSimpleDataSource;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class PersonDao {
     private Person person;
@@ -12,6 +15,14 @@ public class PersonDao {
     public PersonDao(DataSource dataSource) {
 
         this.dataSource = dataSource;
+    }
+
+    public static DataSource createDataSource() {
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setURL("jdbc:postgresql://localhost:5432/person_db");
+        dataSource.setUser("person_dbuser");
+        dataSource.setPassword("99fy68_'f[Cvt%T\\6C");
+        return dataSource;
     }
 
     public void save(Person person) throws SQLException {
@@ -56,7 +67,7 @@ public class PersonDao {
     public List<Person> listByLastName(String lastName) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(
-                    "select * from people where las_name = ?"
+                    "select * from people where last_name = ?"
             )) {
                 statement.setString(1, lastName);
 
@@ -76,13 +87,23 @@ public class PersonDao {
 
     }
 
-
-
     private Person mapFromResultSet(ResultSet rs) throws SQLException {
         Person person = new Person();
         person.setId(rs.getLong("id"));
         person.setFirstName(rs.getString("first_name"));
         person.setLastName(rs.getString("last_name"));
         return person;
+    }
+
+
+    public static void main(String[] args) throws SQLException {
+        PersonDao dao = new PersonDao(createDataSource());
+
+        System.out.println("Please enter a last name:");
+
+        Scanner scanner = new Scanner(System.in);
+        String lastName = scanner.nextLine().trim();
+
+        System.out.println(dao.listByLastName(lastName));
     }
 }
