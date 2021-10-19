@@ -12,18 +12,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PersonDaoTest {
 
+    private final PersonDao dao = new PersonDao(creatDataSource());
+
+
+
 
     @Test
     void shouldRetrieveSavedPersonFromDatabase() throws SQLException {
-        PersonDao dao = new PersonDao(creatDataSource());
-
         Person person = examplePerson();
         dao.save(person);
 
         assertThat(dao.retrieve(person.getId()))
                 .usingRecursiveComparison()
-                .isEqualTo(person)
-        ;
+                .isEqualTo(person);
+    }
+
+
+    @Test
+    void shouldListPeopleByLastName() throws SQLException {
+        Person matchingPerson = examplePerson();
+        matchingPerson.setLastName("Testperson");
+        dao.save(matchingPerson);
+
+        Person anotherMatchingPerson = examplePerson();
+        anotherMatchingPerson.setLastName(matchingPerson.getLastName());
+        dao.save(anotherMatchingPerson);
+
+        Person nonMatchingPerson = examplePerson();
+        dao.save(nonMatchingPerson);
+
+        assertThat(dao.listByLastName(matchingPerson.getLastName()))
+        .extracting(Person::getId)
+        .contains(matchingPerson.getId(), anotherMatchingPerson.getId())
+        .doesNotContain(nonMatchingPerson.getId());
     }
 
     private Person examplePerson() {
@@ -44,4 +65,7 @@ public class PersonDaoTest {
         dataSource.setPassword("99fy68_'f[Cvt%T\\6C");
         return dataSource;
     }
+
+
+
 }

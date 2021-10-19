@@ -2,6 +2,7 @@ package no.kristiania;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.List;
 
 public class PersonDao {
     private Person person;
@@ -53,4 +54,7 @@ public class PersonDao {
         }
     }
 
+    public List<Person> listByLastName(String lastName) {
+        return null;
+    }
 }
